@@ -19,7 +19,7 @@ public interface UserService {
                     String Password,
                     String Email,
                     Long Money,
-                    List<Chore> ChoreIds);
+                    List <Long> choreIds);
 
 
 //    double calculateEarnings(Long id);

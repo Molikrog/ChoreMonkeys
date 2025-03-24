@@ -24,38 +24,41 @@ public class ChoreServiceImpl implements ChoreService {
     }
 
     @Override
-    public List<Chore> findById(List<Long> choreIds) {
-        List<Chore> chores = choreRepository.findAllById(choreIds);
-
-        if(chores.size() != choreIds.size()) {
-            throw new InvalidChoresIdException("One or more chore IDs are invalid");
-        }
-        return chores;
+    public Chore findById(Long choreId) {
+        return choreRepository.findById(choreId).orElseThrow(InvalidChoresIdException::new);
     }
 
-    @Override
-    public List<Chore> findChoresByIds(List<Chore> chores) {
-        // Extract IDs from the list of Chore entities
-        List<Long> choreIds = chores.stream()
-                .map(Chore::getChoreId)
-                .collect(Collectors.toList());
-
-        // Fetch the Chore entities from the repository using the IDs
-        List<Chore> result = choreRepository.findAllById(choreIds);
-
-        // Validate if all IDs were found (optional)
-        if (result.size() != choreIds.size()) {
-            throw new InvalidChoresIdException("One or more chore IDs are invalid");
-        }
-
-        return result;
-    }
+//    @Override
+//    public List<Chore> findChoresByIds(List<Chore> chores) {
+//        // Extract IDs from the list of Chore entities
+//        List<Long> choreIds = chores.stream()
+//                .map(Chore::getChoreId)
+//                .collect(Collectors.toList());
+//
+//        // Fetch the Chore entities from the repository using the IDs
+//        List<Chore> result = choreRepository.findAllById(choreIds);
+//
+//        // Validate if all IDs were found (optional)
+//        if (result.size() != choreIds.size()) {
+//            throw new InvalidChoresIdException("One or more chore IDs are invalid");
+//        }
+//
+//        return result;
+//    }
 
     @Override
     public List<Chore> findByTitle(String Title) {
-        List<Chore> chores = choreRepository.findbyTitle(Title);
+        return choreRepository.findbyTitle(Title);
+    }
 
-        return chores;
+    @Override
+    public List<Chore> findByDestination(String destination) {
+        return choreRepository.findbyDestination(destination);
+    }
+
+    @Override
+    public List<Chore> findByIds(List<Long> choreIds) {
+        return choreRepository.findAllById(choreIds);
     }
 
     @Override

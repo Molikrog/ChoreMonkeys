@@ -5,9 +5,11 @@ import java.util.List;
 
 public interface ChoreService {
 
-    public List<Chore> findById(List<Long> choreIds);
-    public List<Chore> findChoresByIds(List<Chore> chores);
+    public Chore findById(Long choreId);
+//    public List<Chore> findChoresByIds(List<Chore> chores);
     List<Chore> findByTitle(String Title);
+    List<Chore> findByDestination(String destination);
+    public List<Chore> findByIds(List<Long> choreIds);
 
     List<Chore> findAll();
 

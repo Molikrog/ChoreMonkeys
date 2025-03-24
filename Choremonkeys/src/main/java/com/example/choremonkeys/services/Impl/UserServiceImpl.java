@@ -28,8 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(String Username, String Password, String Email, Long Money, List<Chore> choreId) {
-        List<Chore> chores = this.choreService.findChoresByIds(choreId);
-        return this.userRepository.save(new User(Username, Password, Email, Money, chores));
+        return this.userRepository.save(new User(Username, Password, Email, Money, choreId));
     }
 
     @Override
@@ -39,8 +38,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, String Username, String Password, String Email, Long Money, List<Chore> ChoreIds) {
-        List<Chore> chores = this.choreService.findChoresByIds(ChoreIds);
+    public User updateUser(Long id, String Username, String Password, String Email, Long Money, List<Long> choreIds) {
+        List<Chore> chores = this.choreService.findByIds(choreIds);
         User user = this.userRepository.findById(id).orElseThrow(InvalidUserIdExcpetion::new);
         user.setUsername(Username);
         user.setPassword(Password);
