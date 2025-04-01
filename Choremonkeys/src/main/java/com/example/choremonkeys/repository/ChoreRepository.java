@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 public interface ChoreRepository extends JpaSpecificationRepository<Chore, Long>, JpaRepository<Chore, Long> {
-    @Query ("SELECT c FROM Chore c WHERE LOWER(c.Title) LIKE CONCAT(LOWER(:title), '%')")
-    List<Chore> findbyTitle(String Title);
-    @Query ("SELECT c FROM Chore c WHERE LOWER(c.Destination) LIKE CONCAT(LOWER(:title), '%')")
-    List<Chore> findbyDestination(String Destination);
+    @Query ("SELECT c FROM Chore c WHERE LOWER(c.title) LIKE CONCAT(LOWER(:title), '%')")
+    List<Chore> findbyTitle(String title);
+    @Query ("SELECT c FROM Chore c WHERE LOWER(c.destination) LIKE CONCAT(LOWER(:title), '%')")
+    List<Chore> findbyDestination(String destination);
 }

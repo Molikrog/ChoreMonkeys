@@ -10,13 +10,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ChoreServiceImpl implements ChoreService {
 
-    ChoreRepository choreRepository;
-    UserService userService;
+    private final ChoreRepository choreRepository;
+    private final UserService userService;
 
     public ChoreServiceImpl(ChoreRepository choreRepository, @Lazy UserService userService) {
         this.choreRepository = choreRepository;
