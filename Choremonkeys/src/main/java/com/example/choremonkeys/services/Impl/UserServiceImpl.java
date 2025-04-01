@@ -6,20 +6,17 @@ import com.example.choremonkeys.models.exceptions.InvalidUserIdExcpetion;
 import com.example.choremonkeys.repository.UserRepository;
 import com.example.choremonkeys.services.ChoreService;
 import com.example.choremonkeys.services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    UserRepository userRepository;
-    ChoreService choreService;
-
-    public UserServiceImpl(UserRepository userRepository, ChoreService choreService) {
-        this.userRepository = userRepository;
-        this.choreService = choreService;
-    }
+    private final UserRepository userRepository;
+    private final ChoreService choreService;
 
     @Override
     public User findById(Long id) {

@@ -20,9 +20,4 @@ public interface UserService {
                     String Email,
                     Long Money,
                     List <Long> choreIds);
-
-
-//    double calculateEarnings(Long id);
-
-//    List<User> searchUserByName(String name);
 }
