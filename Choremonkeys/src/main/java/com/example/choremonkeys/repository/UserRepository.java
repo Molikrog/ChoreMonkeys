@@ -9,8 +9,8 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaSpecificationRepository<User, Long>,JpaRepository<User, Long> {
-    @Query("SELECT u FROM User u WHERE LOWER(u.Username) LIKE CONCAT(LOWER(:Username), '%')")
-    List<User> searchUserByName(String Username);
+    @Query("SELECT u FROM User u WHERE LOWER(u.username) LIKE CONCAT(LOWER(:username), '%')")
+    List<User> searchUserByName(String username);
 
 
 }

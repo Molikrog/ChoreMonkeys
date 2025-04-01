@@ -3,8 +3,6 @@ package com.example.choremonkeys.models;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -17,11 +15,11 @@ public class User {
 
     @Id
     @GeneratedValue
-    private Long Id;
-    private String Username;
-    private String Password;
-    private String Email;
-    private Long Money;
+    private Long id;
+    private String username;
+    private String password;
+    private String email;
+    private Long money;
     @Setter
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
@@ -30,17 +28,11 @@ public class User {
     )
     private List<Chore> chores;
 
-
-    public User(String username,
-                String password,
-                String email,
-                Long money,
-                List<Chore> chores) {
-        this.Username = username;
-        this.Password = password;
-        this.Email = email;
-        this.Money = money;
+    public User(String username, String password, String email, Long money, List<Chore> chores) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.money = money;
         this.chores = chores;
-        }
-
+    }
 }
