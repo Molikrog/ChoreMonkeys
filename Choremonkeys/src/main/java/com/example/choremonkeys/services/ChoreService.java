@@ -1,30 +1,45 @@
 package com.example.choremonkeys.services;
+
 import com.example.choremonkeys.models.Chore;
+import com.example.choremonkeys.models.ChoreStatus;
+import com.example.choremonkeys.models.User;
+import com.example.choremonkeys.models.UserType;
 
 import java.util.List;
 
 public interface ChoreService {
 
-    public Chore findById(Long choreId);
-//    public List<Chore> findChoresByIds(List<Chore> chores);
-    List<Chore> findByTitle(String Title);
-    List<Chore> findByDestination(String destination);
-    public List<Chore> findByIds(List<Long> choreIds);
-
+    // READ operations
+    Chore findById(Long choreId);
     List<Chore> findAll();
+    List<Chore> findByTitle(String title);
+    List<Chore> findByDestination(String destination);
+    List<Chore> findByStatus(ChoreStatus choreStatus);
+    List<Chore> findByPriceRange(Long minPrice, Long maxPrice);
 
-    Chore createChore(String Title,
-                      String Description,
-                      String Destination,
-                      Integer PhoneNumber,
-                      Long Price,
-                      Long userId);
-    Chore update(Long ChoreId,
-                 String Title,
-                 String Description,
-                 String Destination,
-                 Integer PhoneNumber,
-                 Long Price,
-                 Long userId);
-    void delete(Long ChoreId);
+    // CREATE operations
+
+    Chore createChoreWithStatus(String title,
+                                String description,
+                                String destination,
+                                Integer phoneNumber,
+                                Long price,
+                                ChoreStatus choreStatus);
+
+    // UPDATE operations
+    Chore updateChore(Long id,
+                      String title,
+                      String description,
+                      String destination,
+                      Integer phoneNumber,
+                      Long price,
+                      ChoreStatus choreStatus);
+
+    Chore updateChoreStatus(Long id, ChoreStatus choreStatus);
+
+    // DELETE operations
+    void deleteChore(Long choreId);
+
+    // UTILITY operations
+    boolean existsById(Long choreId);
 }

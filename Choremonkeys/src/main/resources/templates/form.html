@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>WP Exam</title>
+</head>
+<body>
+<!-- The form should submit to ReservationsController.create or ReservationsController.update,
+     depending on whether we are creating or editing a reservation -->
+<form method="POST">
+    <div>
+        <label for="guestName">Guest Name</label>
+        <input type="text"
+               id="guestName"
+               name="guestName"
+
+               required>
+    </div>
+    <div>
+        <label for="dateCreated">Date of Creation</label>
+        <input type="date"
+               id="dateCreated"
+               name="dateCreated"
+               required>
+    </div>
+    <div>
+        <label for="daysOfStay">Days of Stay</label>
+        <input type="number"
+               id="daysOfStay"
+               name="daysOfStay"
+               required>
+    </div>
+    <div>
+        <label for="roomType">Room Type</label><br/>
+        <select id="roomType" name="roomType" multiple="multiple" size="5">
+            <option>[roomType]</option>
+            <!-- For each RoomType you should have one <option> like below  -->
+        </select>
+    </div>
+    <div>
+        <label>Hotel</label><br/>
+        <select id="hotel" name="hotel.id" multiple="multiple" size="5">
+            <!-- For each hotel you should have one <option> like below  -->
+            <option>[hotel.name]</option>
+        </select>
+    </div>
+
+    <button id="submit" type="submit">Submit</button>
+    <a id="back" href="/reservations" type="button" class="btn btn-primary">Back to reservations</a>
+</form>
+
+<div>
+    <ul id="nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</div>
+
+</body>
+</html>

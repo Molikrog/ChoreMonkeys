@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ChoreRepository extends JpaSpecificationRepository<Chore, Long>, JpaRepository<Chore, Long> {
+public interface ChoreRepository extends JpaRepository<Chore, Long> {
     @Query ("SELECT c FROM Chore c WHERE LOWER(c.Title) LIKE CONCAT(LOWER(:title), '%')")
     List<Chore> findbyTitle(String Title);
     @Query ("SELECT c FROM Chore c WHERE LOWER(c.Destination) LIKE CONCAT(LOWER(:title), '%')")
