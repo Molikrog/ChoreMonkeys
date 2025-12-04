@@ -75,7 +75,6 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
         User user = userService.findById(employerId);
         choreAssignment.setChoreStatus(ChoreStatus.Completed);
         user.setMoney(user.getMoney());
-        choreAssignment.setEmployerList();
         return null;
     }
 
