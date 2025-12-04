@@ -85,11 +85,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean existsByUsername(String username) {
-        return false;
+        return userRepository.findByUsername(username).isPresent();
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return false;
+        return userRepository.findByEmail(email).isPresent();
     }
 }

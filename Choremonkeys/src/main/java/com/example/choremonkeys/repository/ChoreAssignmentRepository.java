@@ -9,14 +9,11 @@ import java.util.List;
 
 public interface ChoreAssignmentRepository extends JpaRepository<ChoreAssignment, Long> {
 
-    List<ChoreAssignment> findByChore_ChoreId(Long choreId);
-    List<ChoreAssignment> findByUser_UserIdAndChoreStatus(Long choreId, ChoreStatus choreStatus);
-    // Find chores posted by this user with specific status
-    List<ChoreAssignment> findByUser_idAndUserTypeAndChoreStatus(Long employerId, ChoreStatus choreStatus);
-
     List<ChoreAssignment> findByEmployer_Id(Long employerId);
+
     List<ChoreAssignment> findByWorker_Id(Long workerId);
 
-    //ChoreStatus
-    List<ChoreAssignment> findAllByChoreStatus(ChoreStatus choreStatus);
+    List<ChoreAssignment> findAllByChoreStatus(ChoreStatus status);
+
+    List<ChoreAssignment> findByChore_ChoreId(Long choreId);
 }

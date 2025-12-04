@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,7 +20,7 @@ public class ChoreAssignment {
     @Id
     private Long posterId;
     private Long max;
-    private Long date;
+    private LocalDateTime localDateTime;
 
     @Enumerated(EnumType.STRING)
     ChoreStatus choreStatus;
@@ -28,12 +29,16 @@ public class ChoreAssignment {
     private Chore choreList;
 
     @ManyToOne
-    private User userList;
+    private User employerList;
 
-    public ChoreAssignment(User userList, Chore choreList, Long date){
-        this.userList = userList;
+    @ManyToOne
+    private User workerList;
+
+
+    public ChoreAssignment ( User employerList, Chore choreList, LocalDateTime deadline){
+        this.employerList = employerList;
         this.choreList = choreList;
-        this.date = date;
+        this.localDateTime = deadline;
     }
 
 }

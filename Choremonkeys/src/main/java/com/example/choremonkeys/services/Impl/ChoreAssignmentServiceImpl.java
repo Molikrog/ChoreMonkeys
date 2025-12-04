@@ -1,14 +1,11 @@
 package com.example.choremonkeys.services.Impl;
 
-import com.example.choremonkeys.models.ChoreAssignment;
-import com.example.choremonkeys.models.ChoreStatus;
-import com.example.choremonkeys.models.UserType;
+import com.example.choremonkeys.models.*;
 import com.example.choremonkeys.models.exceptions.InvalidChoreAssignmentIdException;
 import com.example.choremonkeys.repository.ChoreAssignmentRepository;
 import com.example.choremonkeys.services.ChoreAssignmentService;
 import com.example.choremonkeys.services.ChoreService;
 import com.example.choremonkeys.services.UserService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,14 +14,15 @@ import java.util.List;
 @Service
 public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
 
-    final private ChoreAssignmentRepository choreAssignmentRepository;
-    final private ChoreService choreService;
-    final private UserService userService;
+    private final ChoreAssignmentRepository choreAssignmentRepository;
+    private final UserService userService;
+    private final ChoreService choreService;
 
-    public ChoreAssignmentServiceImpl(ChoreAssignmentRepository choreAssignmentRepository, ChoreService choreService, UserService userService) {
+
+    public ChoreAssignmentServiceImpl(ChoreAssignmentRepository choreAssignmentRepository, UserService userService, ChoreService choreService) {
         this.choreAssignmentRepository = choreAssignmentRepository;
-        this.choreService = choreService;
         this.userService = userService;
+        this.choreService = choreService;
     }
 
     @Override
@@ -38,45 +36,16 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
     }
 
     @Override
-    public List<ChoreAssignment> findByChoreId(Long choreId) {
-        return choreAssignmentRepository.findByChore_ChoreId(choreId); // you need to make a choreAssignment_Choreid quaery in the repo to search in the table of only the needed chore id assignments.
-        //like trying to find the chore mow the lawn chore id in all the assignments that have been posted on the board.
-    }
-
-    @Override
-    public List<ChoreAssignment> findByEmployerId(Long employerId) {
-        return choreAssignmentRepository.findByEmployer_Id(employerId);
-    }
-
-    @Override
-    public List<ChoreAssignment> findByEmployerIdAndStatus(Long employerId, ChoreStatus choreStatus) {
-        return choreAssignmentRepository.findByUser_UserIdAndChoreStatus(employerId, choreStatus);
-
-    }
-
-    @Override
-    public List<ChoreAssignment> findByWorkerId(Long workerId) {
-        return choreAssignmentRepository.findByWorker_Id(workerId);
-    }
-
-    @Override
-    public List<ChoreAssignment> findByWorkerIdAndStatus(Long workerId, ChoreStatus choreStatus) {
-        return choreAssignmentRepository.findByUser_idAndUserTypeAndChoreStatus(workerId,choreStatus);
-    }
-
-    @Override
     public List<ChoreAssignment> findAvailableChores() {
         return choreAssignmentRepository.findAllByChoreStatus(ChoreStatus.Available);
     }
 
     @Override
-    public ChoreAssignment createChoreAssignment(Long employerId, Long choreId, LocalDateTime deadline) {
-        return choreAssignmentRepository.save(new ChoreAssignment(employerId, choreId, deadline));
-    }
+    public ChoreAssignment createAssignment(Long employerId, Long choreId, LocalDateTime deadline) {
 
-    @Override
-    public ChoreAssignment createChoreAssignmentWithWorker(Long employerId, Long choreId, Long workerId, LocalDateTime deadline) {
-        return null;
+        User employer = userService.findById(employerId);
+        Chore chore = choreService.findById(choreId);
+        return choreAssignmentRepository.save(new ChoreAssignment(employer, chore, deadline));
     }
 
     @Override
@@ -86,6 +55,11 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
 
     @Override
     public ChoreAssignment startChore(Long assignmentId, Long workerId) {
+
+        ChoreAssignment choreAssignment = findById(assignmentId);
+        User worker = userService.findById(workerId);
+        choreAssignment.setChoreStatus(ChoreStatus.Taken);
+
         return null;
     }
 
@@ -95,47 +69,48 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
     }
 
     @Override
-    public ChoreAssignment approveAndPayChore(Long assignmentId, Long employerId) {
+    public ChoreAssignment approveAndPay(Long assignmentId, Long employerId) {
+
+        ChoreAssignment choreAssignment = findById(assignmentId);
+        User user = userService.findById(employerId);
+        choreAssignment.setChoreStatus(ChoreStatus.Completed);
+        user.setMoney(user.getMoney());
+        choreAssignment.setEmployerList();
         return null;
     }
 
     @Override
-    public ChoreAssignment cancelAssignment(Long assignmentId) {
-        return null;
-    }
+    public ChoreAssignment cancel(Long assignmentId) {
 
-    @Override
-    public ChoreAssignment unassignWorker(Long assignmentId, Long workerId) {
-        return null;
-    }
-
-    @Override
-    public ChoreAssignment updateStatus(Long assignmentId, ChoreStatus choreStatus) {
-        return null;
-    }
-
-    @Override
-    public void deleteAssignment(Long assignmentId) {
+        ChoreAssignment choreAssignment = findById(assignmentId);
+        choreAssignment.setChoreStatus(ChoreStatus.Cancelled);
+        choreAssignmentRepository.save(choreAssignment);
+        return choreAssignment;
 
     }
 
     @Override
-    public boolean isWorkerAssignedToChore(Long assignmentId, Long workerId) {
-        return false;
+    public List<ChoreAssignment> findByEmployer(Long employerId) {
+        return choreAssignmentRepository.findByEmployer_Id(employerId);
     }
 
     @Override
-    public boolean canWorkerAcceptChore(Long assignmentId, Long workerId) {
-        return false;
-    }
-
-    @Override
-    public int getActiveChoreCountForWorker(Long workerId) {
-        return 0;
+    public List<ChoreAssignment> findByWorker(Long workerId) {
+        return choreAssignmentRepository.findByWorker_Id(workerId);
     }
 
     @Override
     public List<ChoreAssignment> findExpiredAssignments() {
         return List.of();
+    }
+
+    @Override
+    public List<User> getWorkers() {
+        return userService.findAll().stream().filter(w -> w.getUserType() == UserType.WORKER).toList();
+    }
+
+    @Override
+    public List<User> getEmployers() {
+        return userService.findAll().stream().filter(e -> e.getUserType() == UserType.EMPLOYER).toList();
     }
 }

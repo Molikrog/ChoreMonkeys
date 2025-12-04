@@ -4,5 +4,6 @@ public enum ChoreStatus {
 
     Available,
     Taken,
-    Completed
+    Completed,
+    Cancelled
 }
