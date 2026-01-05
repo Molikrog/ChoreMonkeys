@@ -3,9 +3,11 @@ package com.example.choremonkeys.services.Impl;
 import com.example.choremonkeys.models.User;
 import com.example.choremonkeys.models.UserType;
 import com.example.choremonkeys.models.exceptions.InvalidUserIdExcpetion;
+import com.example.choremonkeys.models.exceptions.InvalidUsernameException;
 import com.example.choremonkeys.repository.ChoreRepository;
 import com.example.choremonkeys.repository.UserRepository;
 import com.example.choremonkeys.services.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +17,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, ChoreRepository choreRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -31,8 +35,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(InvalidUsernameException::new);
     }
 
     @Override
@@ -54,7 +58,7 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, String username, String password, String email, Long money, UserType userType) {
         User user = findById(id);
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setEmail(email);
         user.setMoney(money);
         user.setUserType(userType);
@@ -66,10 +70,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUserMoney(Long id, Long money) {
         User user = findById(id);
-        if(money > user.getMoney()) {
+        if (money > user.getMoney()) {
             user.setMoney(user.getMoney() + money);
-        }
-        else{
+        } else {
             Long payed = user.getMoney() - money;
             user.setMoney(user.getMoney() - payed);
         }
@@ -79,8 +82,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-    User user = findById(id);
-    userRepository.delete(user);
+        User user = findById(id);
+        userRepository.delete(user);
     }
 
     @Override
@@ -92,4 +95,22 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
+
+//    @Override
+//    public void migratePlainTextPasswords() {
+//        List<User> users = userRepository.findAll();
+//
+//        for (User user : users) {
+//
+//            // skip already encoded passwords
+//            if (user.getPassword().startsWith("$2a$")
+//                    || user.getPassword().startsWith("$2b$")) {
+//                continue;
+//            }
+//
+//            String encoded = passwordEncoder.encode(user.getPassword());
+//            user.setPassword(encoded);
+//            userRepository.save(user);
+//        }
+//    }
 }

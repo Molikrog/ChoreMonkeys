@@ -7,38 +7,44 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "app_ChoreAssignment")
+@Table(name = "app_chore_assignment")
 
 public class ChoreAssignment {
+
     @Id
-    private Long posterId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private Long max;
     private LocalDateTime localDateTime;
+
 
     @Enumerated(EnumType.STRING)
     ChoreStatus choreStatus;
 
-    @ManyToOne
-    private Chore choreList;
+    @ManyToOne (optional = false)
+    private Chore chore;
+
+    @ManyToOne (optional = false)
+    private User employer;
 
     @ManyToOne
-    private User employerList;
-
-    @ManyToOne
-    private User workerList;
+    private User worker;
 
 
-    public ChoreAssignment ( User employerList, Chore choreList, LocalDateTime deadline){
-        this.employerList = employerList;
-        this.choreList = choreList;
+    public ChoreAssignment ( User employerList, Chore choreList, LocalDateTime deadline, ChoreStatus choreStatus){
+        this.employer = employerList;
+        this.chore = choreList;
         this.localDateTime = deadline;
+        this.choreStatus = choreStatus;
     }
+
+
 
 }

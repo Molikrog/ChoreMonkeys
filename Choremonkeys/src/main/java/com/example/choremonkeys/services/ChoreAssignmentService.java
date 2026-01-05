@@ -37,4 +37,8 @@ public interface ChoreAssignmentService {
     List<User> getWorkers ();
 
     List<User> getEmployers ();
+
+    ChoreAssignment assignWorker(Long choreId, User worker);
+
+    ChoreAssignment removeWorker(Long assignmentId, Long employerId);
 }

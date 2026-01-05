@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: siteHead(${title})}"></th:block>
+</head>
+<body class="min-h-screen bg-gray-100">
+
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+
+<main class="flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-6xl w-full p-8">
+        <div th:replace="~{${content} :: content}"></div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter}"></div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: siteHead('Login')}"></th:block>
+</head>
+<body class="min-h-screen bg-gray-100">
+
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+
+<main class="flex items-center justify-center min-h-[80vh] p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+
+        <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+
+        <form th:action="@{/login}" method="post" class="space-y-4">
+
+            <input type="text"
+                   name="username"
+                   placeholder="Username"
+                   class="w-full p-3 border rounded-lg focus:outline-none focus:ring"
+                   required>
+
+            <input type="password"
+                   name="password"
+                   placeholder="Password"
+                   class="w-full p-3 border rounded-lg focus:outline-none focus:ring"
+                   required>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                Login
+            </button>
+
+        </form>
+
+        <!-- ERROR MESSAGE -->
+        <p th:if="${param.error}"
+           class="text-red-600 text-center mt-4">
+            Invalid username or password
+        </p>
+
+        <!-- LOGOUT MESSAGE -->
+        <p th:if="${param.logout}"
+           class="text-green-600 text-center mt-4">
+            You have been logged out successfully
+        </p>
+
+        <p class="text-center text-sm mt-6">
+            Don’t have an account?
+            <a href="/register" class="text-blue-600 hover:underline">
+                Sign up
+            </a>
+        </p>
+
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: siteFooter"></div>
+
+</body>
+</html>

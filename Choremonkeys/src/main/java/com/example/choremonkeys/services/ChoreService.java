@@ -2,8 +2,6 @@ package com.example.choremonkeys.services;
 
 import com.example.choremonkeys.models.Chore;
 import com.example.choremonkeys.models.ChoreStatus;
-import com.example.choremonkeys.models.User;
-import com.example.choremonkeys.models.UserType;
 
 import java.util.List;
 
@@ -17,14 +15,8 @@ public interface ChoreService {
     List<Chore> findByStatus(ChoreStatus choreStatus);
     List<Chore> findByPriceRange(Long minPrice, Long maxPrice);
 
-    // CREATE operations
 
-    Chore createChoreWithStatus(String title,
-                                String description,
-                                String destination,
-                                Integer phoneNumber,
-                                Long price,
-                                ChoreStatus choreStatus);
+    Chore createChoreWithStatus(String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus);
 
     // UPDATE operations
     Chore updateChore(Long id,

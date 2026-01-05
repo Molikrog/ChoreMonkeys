@@ -2,17 +2,13 @@ package com.example.choremonkeys.services.Impl;
 
 import com.example.choremonkeys.models.Chore;
 import com.example.choremonkeys.models.ChoreStatus;
-import com.example.choremonkeys.models.User;
 import com.example.choremonkeys.models.exceptions.InvalidChoresIdException;
 import com.example.choremonkeys.repository.ChoreAssignmentRepository;
 import com.example.choremonkeys.repository.ChoreRepository;
 import com.example.choremonkeys.services.ChoreService;
-import com.example.choremonkeys.services.UserService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ChoreServiceImpl implements ChoreService {
@@ -53,9 +49,11 @@ public class ChoreServiceImpl implements ChoreService {
         return findAll();
     }
 
+
+
     @Override
-    public Chore createChoreWithStatus(String title, String description, String destination, Integer phoneNumber, Long price, ChoreStatus choreStatus) {
-        return choreRepository.save(new Chore(title, description, destination, phoneNumber, price, choreStatus));
+    public Chore createChoreWithStatus(String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus) {
+        return choreRepository.save(new Chore(title, description, destination, price, phoneNumber, choreStatus));
     }
 
     @Override

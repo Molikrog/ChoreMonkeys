@@ -1,0 +1,119 @@
+<div    th:fragment="content"
+        xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+
+<div class="space-y-8">
+
+    <div class="flex flex-col md:flex-row items-center justify-between p-6 bg-gray-50 rounded-xl shadow-inner">
+
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-user-circle text-5xl text-gray-400"></i>
+
+            <span sec:authorize="isAuthenticated()"
+                  sec:authentication="name"
+                  class="text-3xl font-bold text-gray-800">
+            </span>
+
+            <span sec:authorize="isAnonymous()"
+                  class="text-3xl font-bold text-gray-800">
+                Guest
+            </span>
+        </div>
+
+        <div class="flex items-center space-x-4"
+             sec:authorize="isAuthenticated()">
+
+            <span>Worker</span>
+
+            <input type="checkbox"
+                   sec:authorize="hasRole('EMPLOYER')"
+                   checked
+                   disabled>
+
+            <input type="checkbox"
+                   sec:authorize="hasRole('WORKER')"
+                   disabled>
+
+            <span>Employer</span>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-4">
+
+        <div sec:authorize="hasRole('EMPLOYER')">
+            <a th:href="@{/chores/add}"
+               class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+                Create Chore
+            </a>
+        </div>
+
+
+        <div sec:authorize="hasRole('WORKER')">
+            <p class="text-blue-600 font-medium">
+                You can apply for available chores
+            </p>
+
+        </div>
+
+        <div sec:authorize="isAnonymous()" class="flex gap-3">
+            <a href="/login"
+               class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+                Login
+            </a>
+
+            <a href="/register"
+               class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
+                Sign Up
+            </a>
+        </div>
+        <div sec:authorize="isAuthenticated()" class="flex justify-end gap-4">
+            <form th:action="@{/logout}" method="post">
+                <button
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition">
+                    Logout
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <div class="w-full h-80 rounded-xl overflow-hidden">
+        <img src="https://placehold.co/900x500"
+             class="w-full h-full object-cover"
+             alt="Chores banner">
+    </div>
+
+    <table class="w-full border border-gray-300 rounded-lg overflow-hidden">
+        <thead class="bg-gray-100">
+        <tr>
+            <th class="p-3 text-left">ID</th>
+            <th class="p-3 text-left">Title</th>
+            <th class="p-3 text-left">Destination</th>
+            <th class="p-3 text-left">Price</th>
+            <th class="p-3 text-left">Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="assignment : ${chores}"
+            class="border-t hover:bg-gray-50">
+            <td class="p-3" th:text="${assignment.chore.choreId}"></td>
+            <td class="p-3" th:text="${assignment.chore.title}"></td>
+            <td class="p-3" th:text="${assignment.chore.destination}"></td>
+            <td class="p-3" th:text="${assignment.chore.price}"></td>
+            <td class="p-3" th:text="${assignment.chore.choreStatus}"></td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(chores)}">
+            <td colspan="5" class="p-6 text-center text-gray-500">
+                No chores available.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+</div>

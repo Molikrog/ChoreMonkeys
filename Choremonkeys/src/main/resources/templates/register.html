@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: siteHead('Register')}"></th:block>
+</head>
+<body class="min-h-screen bg-gray-100">
+
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+
+<main class="flex items-center justify-center min-h-[80vh] p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+
+        <h2 class="text-2xl font-bold text-center mb-6">Create Account</h2>
+
+        <form th:action="@{/register}"
+              th:object="${user}"
+              method="post"
+              class="space-y-4">
+
+            <input type="text"
+                   th:field="*{username}"
+                   placeholder="Username"
+                   required />
+
+            <input type="password"
+                   th:field="*{password}"
+                   placeholder="Password"
+                   required />
+
+            <input type="email"
+                   th:field="*{email}"
+                   placeholder="Email"
+                   required />
+
+            <input type="number"
+                   th:field="*{money}"
+                   placeholder="Initial balance"
+                   min="0"
+                   required />
+
+            <select th:field="*{userType}" required>
+                <option value="" disabled>Select role</option>
+                <option value="WORKER">Worker</option>
+                <option value="EMPLOYER">Employer</option>
+            </select>
+
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <p class="text-center text-sm mt-6">
+            Already have an account?
+            <a th:href="@{/login}" class="text-blue-600 hover:underline">
+                Login
+            </a>
+        </p>
+
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: siteFooter"></div>
+
+</body>
+</html>

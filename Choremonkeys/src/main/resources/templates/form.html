@@ -1,60 +1,84 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>WP Exam</title>
-</head>
-<body>
-<!-- The form should submit to ReservationsController.create or ReservationsController.update,
-     depending on whether we are creating or editing a reservation -->
-<form method="POST">
-    <div>
-        <label for="guestName">Guest Name</label>
-        <input type="text"
-               id="guestName"
-               name="guestName"
+<div th:fragment="content" class="max-w-xl mx-auto bg-white p-6 rounded shadow">
 
-               required>
-    </div>
-    <div>
-        <label for="dateCreated">Date of Creation</label>
-        <input type="date"
-               id="dateCreated"
-               name="dateCreated"
-               required>
-    </div>
-    <div>
-        <label for="daysOfStay">Days of Stay</label>
-        <input type="number"
-               id="daysOfStay"
-               name="daysOfStay"
-               required>
-    </div>
-    <div>
-        <label for="roomType">Room Type</label><br/>
-        <select id="roomType" name="roomType" multiple="multiple" size="5">
-            <option>[roomType]</option>
-            <!-- For each RoomType you should have one <option> like below  -->
-        </select>
-    </div>
-    <div>
-        <label>Hotel</label><br/>
-        <select id="hotel" name="hotel.id" multiple="multiple" size="5">
-            <!-- For each hotel you should have one <option> like below  -->
-            <option>[hotel.name]</option>
-        </select>
-    </div>
+    <h2 class="text-2xl font-semibold mb-6"
+        th:text="${chore.choreId != null} ? 'Edit Chore' : 'Add New Chore'">
+        Add New Chore
+    </h2>
 
-    <button id="submit" type="submit">Submit</button>
-    <a id="back" href="/reservations" type="button" class="btn btn-primary">Back to reservations</a>
-</form>
+    <form th:action="${chore.choreId != null}
+            ? @{/chores/edit/{id}(id=${chore.choreId})}
+            : @{/chores/add}"
+          method="post"
+          class="space-y-4">
 
-<div>
-    <ul id="nav">
-        <li><a href="/">Home</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/logout">Logout</a></li>
-    </ul>
+        <!-- Title -->
+        <div>
+            <label class="block font-medium mb-1">Title</label>
+            <input type="text"
+                   name="title"
+                   class="w-full border rounded px-3 py-2"
+                   placeholder="Chore title"
+                   th:value="${chore.title}"
+                   required>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label class="block font-medium mb-1">Description</label>
+            <textarea name="description"
+                      class="w-full border rounded px-3 py-2"
+                      placeholder="Describe the chore"
+                      rows="4"
+                      required
+                      th:text="${chore.description}">
+            </textarea>
+        </div>
+
+        <!-- Destination -->
+        <div>
+            <label class="block font-medium mb-1">Location</label>
+            <input type="text"
+                   name="destination"
+                   class="w-full border rounded px-3 py-2"
+                   placeholder="Address or area"
+                   th:value="${chore.destination}">
+        </div>
+
+        <!-- Phone -->
+        <div>
+            <label class="block font-medium mb-1">Phone Number</label>
+            <input type="number"
+                   name="phoneNumber"
+                   class="w-full border rounded px-3 py-2"
+                   placeholder="Contact phone"
+                   th:value="${chore.phoneNumber}">
+        </div>
+
+        <!-- Price -->
+        <div>
+            <label class="block font-medium mb-1">Price</label>
+            <input type="number"
+                   name="price"
+                   class="w-full border rounded px-3 py-2"
+                   placeholder="Price in denars"
+                   th:value="${chore.price}"
+                   required>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 pt-4">
+            <a href="/dashboard"
+               class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <span th:text="${chore.choreId != null} ? 'Update Chore' : 'Save Chore'">
+                    Save Chore
+                </span>
+            </button>
+        </div>
+
+    </form>
 </div>
-
-</body>
-</html>
