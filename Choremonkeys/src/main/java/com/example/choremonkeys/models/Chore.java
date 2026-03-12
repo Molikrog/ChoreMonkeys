@@ -19,14 +19,22 @@ public class Chore {
     private String title;
     private String description;
     private String destination;
-    private Integer phoneNumber;
-    private Long price;
+    private Long phoneNumber;
+    private int price;
+
+
+    private Double longitude;
+    private Double latitude;
+
+    @ManyToOne
+    @JoinColumn(name = "employer_id")
+    private User employer;
 
     @Enumerated(EnumType.STRING)
     private ChoreStatus choreStatus = ChoreStatus.Available;
 
 
-    public Chore(String title, String description, String destination, Integer phoneNumber, Long price, ChoreStatus choreStatus) {
+    public Chore(String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus) {
         this.title = title;
         this.description = description;
         this.destination = destination;
@@ -34,5 +42,22 @@ public class Chore {
         this.price = price;
         this.choreStatus = choreStatus;
     }
+
+    public Chore(String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus, User employer) {
+        this.title = title;
+        this.description = description;
+        this.destination = destination;
+        this.phoneNumber = phoneNumber;
+        this.price = price;
+        this.choreStatus = choreStatus;
+        this.employer = employer;
+    }
+
+    public Chore(String title, String description, String destination, int price, Long phoneNumber, ChoreStatus choreStatus, Double latitude, Double longitude) {
+        this(title, description, destination, phoneNumber, price, choreStatus); // calls existing constructor
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
 
 }

@@ -33,5 +33,8 @@ public interface UserService {
 
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-//    void migratePlainTextPasswords();
+
+    User updateUserType(Long id, UserType userType);
+
+    void addMoney(Long userId, int amount);
 }

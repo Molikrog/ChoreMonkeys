@@ -1,119 +1,259 @@
-<div    th:fragment="content"
-        xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<div th:fragment="content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<div class="space-y-8">
+    <div class="d-flex flex-column gap-4">
 
-    <div class="flex flex-col md:flex-row items-center justify-between p-6 bg-gray-50 rounded-xl shadow-inner">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between p-4 bg-light rounded shadow-sm">
+            <div class="d-flex align-items-center gap-3">
+                <i class="fas fa-user-circle fa-3x text-secondary"></i>
+                <span sec:authorize="isAuthenticated()"
+                      sec:authentication="name"
+                      class="fs-3 fw-bold text-dark"></span>
+                <span sec:authorize="isAnonymous()"
+                      class="fs-3 fw-bold text-dark">Guest</span>
+            </div>
 
-        <div class="flex items-center space-x-4">
-            <i class="fas fa-user-circle text-5xl text-gray-400"></i>
+            <div sec:authorize="isAuthenticated()">
+                <form th:action="@{/profile/switch-role}" method="post">
+                    <span>Worker</span>
+                    <div class="form-check form-switch mb-0 d-inline-block">
+                        <input class="form-check-input" type="checkbox"
+                               th:checked="${user.userType.name() == 'EMPLOYER'}"
+                               onchange="this.form.submit()">
+                    </div>
+                    <span>Employer</span>
+                </form>
+            </div>
 
-            <span sec:authorize="isAuthenticated()"
-                  sec:authentication="name"
-                  class="text-3xl font-bold text-gray-800">
-            </span>
-
-            <span sec:authorize="isAnonymous()"
-                  class="text-3xl font-bold text-gray-800">
-                Guest
-            </span>
+            <div sec:authorize="isAnonymous()">
+                <span class="text-muted">Login to switch roles</span>
+            </div>
         </div>
 
-        <div class="flex items-center space-x-4"
-             sec:authorize="isAuthenticated()">
-
-            <span>Worker</span>
-
-            <input type="checkbox"
-                   sec:authorize="hasRole('EMPLOYER')"
-                   checked
-                   disabled>
-
-            <input type="checkbox"
-                   sec:authorize="hasRole('WORKER')"
-                   disabled>
-
-            <span>Employer</span>
-        </div>
-    </div>
-
-    <div class="flex justify-end gap-4">
-
-        <div sec:authorize="hasRole('EMPLOYER')">
-            <a th:href="@{/chores/add}"
-               class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
-                Create Chore
-            </a>
-        </div>
-
-
-        <div sec:authorize="hasRole('WORKER')">
-            <p class="text-blue-600 font-medium">
-                You can apply for available chores
-            </p>
-
-        </div>
-
-        <div sec:authorize="isAnonymous()" class="flex gap-3">
-            <a href="/login"
-               class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                Login
-            </a>
-
-            <a href="/register"
-               class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                Sign Up
-            </a>
-        </div>
-        <div sec:authorize="isAuthenticated()" class="flex justify-end gap-4">
-            <form th:action="@{/logout}" method="post">
-                <button
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition">
-                    Logout
-                </button>
+        <div sec:authorize="isAuthenticated()"
+             class="d-flex align-items-center gap-3 p-3 bg-white rounded shadow-sm">
+            <span class="fw-bold">Balance:</span>
+            <span th:text="${user?.money} + ' den'" class="text-success fw-bold fs-5"></span>
+            <form sec:authorize="hasRole('EMPLOYER')" th:action="@{/profile/add-money}" method="post" class="d-flex gap-2 ms-auto">
+                <input type="number" name="amount" class="form-control"
+                       placeholder="Top up amount" style="max-width: 150px;" min="1" required>
+                <button type="submit" class="btn btn-success">Add Money</button>
             </form>
         </div>
 
+        <div class="d-flex justify-content-end gap-2">
+            <a th:href="@{/dashboard/choreCreate}"
+               sec:authorize="hasRole('EMPLOYER')"
+               class="btn btn-success">
+                Create Chore
+            </a>
+            <a th:href="@{/dashboard/assignmentCreate}"
+               sec:authorize="hasRole('EMPLOYER')"
+               class="btn btn-primary">
+                Create Assignment
+            </a>
+
+            <p sec:authorize="hasRole('WORKER')"
+               class="text-primary fw-medium mb-0 align-self-center">
+                You can apply for available chores
+            </p>
+
+            <div sec:authorize="isAnonymous()" class="d-flex gap-2">
+                <a href="/login" class="btn btn-primary">Login</a>
+                <a href="/register" class="btn btn-outline-primary">Sign Up</a>
+            </div>
+
+            <form th:action="@{/logout}" method="post"
+                  sec:authorize="isAuthenticated()">
+                <button class="btn btn-danger">Logout</button>
+            </form>
+
+
+        </div>
+
+        <div sec:authorize="hasRole('WORKER')">
+            <h5 class="fw-bold mb-2">Available Chores Near You</h5>
+            <div id="worker-map" style="height: 400px; border-radius: 12px; border: 1px solid #dee2e6;"></div>
+            <div id="chore-data" style="display:none;">
+                <div th:each="chore : ${choreAssignment}"
+                     th:if="${chore.chore.latitude != null and chore.chore.longitude != null and chore.choreStatus.name() == 'Available'}"
+                     th:data-id="${chore.id}"
+                     th:data-lat="${chore.chore.latitude}"
+                     th:data-lng="${chore.chore.longitude}"
+                     th:data-title="${chore.chore.title}"
+                     th:data-price="${chore.chore.price}"
+                     th:data-destination="${chore.chore.destination}"
+                     class="chore-pin">
+                </div>
+            </div>
+        </div>
+
+        <div sec:authorize="hasRole('EMPLOYER')">
+            <h5 class="fw-bold mb-2">Your Posted Chores</h5>
+            <div id="employer-map" style="height: 400px; border-radius: 12px; border: 1px solid #dee2e6;"></div>
+            <div id="employer-chore-data" style="display:none;">
+                <div th:each="assignment : ${myPostedChores}"
+                     th:if="${assignment.chore.latitude != null and assignment.chore.longitude != null}"
+                     th:data-id="${assignment.id}"
+                     th:data-lat="${assignment.chore.latitude}"
+                     th:data-lng="${assignment.chore.longitude}"
+                     th:data-title="${assignment.chore.title}"
+                     th:data-status="${assignment.choreStatus}"
+                     th:data-destination="${assignment.chore.destination}"
+                     class="employer-pin">
+                </div>
+            </div>
+        </div>
+
+        <div sec:authorize="hasRole('EMPLOYER')">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Deadline</th>
+                    <th>Chore</th>
+                    <th>Worker</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="assignment : ${myPostedChores}">
+                    <td th:text="${assignment.id}"></td>
+                    <td th:text="${assignment.localDateTime}"></td>
+                    <td th:text="${assignment.chore.title}"></td>
+                    <td th:text="${assignment.worker}"></td>
+                    <td th:text="${assignment.choreStatus}"></td>
+                    <td>
+                        <form th:action="@{'/dashboard/assignment/{id}' (id = ${assignment.id})}" method="get">
+                            <button type="submit" class="btn btn-secondary btn-sm">Edit</button>
+                        </form>
+                        <form th:action="@{'/assignments/{id}/approve' (id=${assignment.id})}" method="post"
+                              th:if="${assignment.choreStatus.name() == 'AwaitingApproval'}">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                        <form th:action="@{'/assignments/{id}/cancel' (id=${assignment.id})}" method="post"
+                              th:if="${assignment.choreStatus.name() != 'Completed' and assignment.choreStatus.name() != 'Cancelled'}">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+                        <form th:action="@{'/assignments/{id}/remove-worker' (id=${assignment.id})}" method="post"
+                              th:if="${assignment.choreStatus.name() == 'Taken'}">
+                            <button type="submit" class="btn btn-warning btn-sm">Remove Worker</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(myPostedChores)}">
+                    <td colspan="6" class="text-center text-muted p-4">No assignments posted yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div sec:authorize="hasRole('WORKER')">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Destination</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="chore : ${choreAssignment}">
+                    <td th:text="${chore.id}"></td>
+                    <td th:text="${chore.chore.title}"></td>
+                    <td th:text="${chore.chore.destination}"></td>
+                    <td th:text="${chore.chore.price}"></td>
+                    <td th:text="${chore.chore.choreStatus}"></td>
+                    <td>
+                        <form th:action="@{'/assignments/{id}/accept' (id=${chore.id})}" method="post"
+                              th:if="${chore.choreStatus.name() == 'Available'}">
+                            <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                        </form>
+                        <form th:action="@{'/assignments/{id}/complete' (id=${chore.id})}" method="post"
+                              th:if="${chore.choreStatus.name() == 'Taken'}">
+                            <button type="submit" class="btn btn-warning btn-sm">Complete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(choreAssignment)}">
+                    <td colspan="6" class="text-center text-muted p-4">No chores available.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
-    <div class="w-full h-80 rounded-xl overflow-hidden">
-        <img src="https://placehold.co/900x500"
-             class="w-full h-full object-cover"
-             alt="Chores banner">
-    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const workerMapEl = document.getElementById('worker-map');
+        if (workerMapEl) {
+            const workerMap = L.map('worker-map').setView([41.9981, 21.4254], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(workerMap);
 
-    <table class="w-full border border-gray-300 rounded-lg overflow-hidden">
-        <thead class="bg-gray-100">
-        <tr>
-            <th class="p-3 text-left">ID</th>
-            <th class="p-3 text-left">Title</th>
-            <th class="p-3 text-left">Destination</th>
-            <th class="p-3 text-left">Price</th>
-            <th class="p-3 text-left">Status</th>
-        </tr>
-        </thead>
+            const pins = document.querySelectorAll('.chore-pin');
+            pins.forEach(pin => {
+                const lat = parseFloat(pin.dataset.lat);
+                const lng = parseFloat(pin.dataset.lng);
+                const id = pin.dataset.id;
+                const title = pin.dataset.title;
+                const price = pin.dataset.price;
+                const destination = pin.dataset.destination;
 
-        <tbody>
-        <tr th:each="assignment : ${chores}"
-            class="border-t hover:bg-gray-50">
-            <td class="p-3" th:text="${assignment.chore.choreId}"></td>
-            <td class="p-3" th:text="${assignment.chore.title}"></td>
-            <td class="p-3" th:text="${assignment.chore.destination}"></td>
-            <td class="p-3" th:text="${assignment.chore.price}"></td>
-            <td class="p-3" th:text="${assignment.chore.choreStatus}"></td>
-        </tr>
+                const marker = L.marker([lat, lng]).addTo(workerMap);
+                marker.bindPopup(`
+                    <strong>${title}</strong><br>
+                    📍 ${destination}<br>
+                    💰 ${price} den<br>
+                    <form action="/assignments/${id}/accept" method="post" style="margin-top:8px">
+                        <button type="submit" style="background:#0d6efd;color:white;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;">
+                            Accept
+                        </button>
+                    </form>
+                `);
+            });
 
-        <tr th:if="${#lists.isEmpty(chores)}">
-            <td colspan="5" class="p-6 text-center text-gray-500">
-                No chores available.
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            if (pins.length === 0) {
+                workerMapEl.insertAdjacentHTML('afterend', '<p class="text-muted mt-2">No available chores with locations yet.</p>');
+            }
+        }
 
-</div>
+        const employerMapEl = document.getElementById('employer-map');
+        if (employerMapEl) {
+            const employerMap = L.map('employer-map').setView([41.9981, 21.4254], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(employerMap);
 
+            const employerPins = document.querySelectorAll('.employer-pin');
+            employerPins.forEach(pin => {
+                const lat = parseFloat(pin.dataset.lat);
+                const lng = parseFloat(pin.dataset.lng);
+                const title = pin.dataset.title;
+                const status = pin.dataset.status;
+                const destination = pin.dataset.destination;
+
+                const marker = L.marker([lat, lng]).addTo(employerMap);
+                marker.bindPopup(`
+                    <strong>${title}</strong><br>
+                    📍 ${destination}<br>
+                    📋 Status: ${status}
+                `);
+            });
+
+            if (employerPins.length === 0) {
+                employerMapEl.insertAdjacentHTML('afterend', '<p class="text-muted mt-2">No posted chores with locations yet.</p>');
+            }
+        }
+    </script>
 
 </div>

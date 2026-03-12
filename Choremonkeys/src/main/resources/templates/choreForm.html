@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        #suggestions {
+            position: absolute;
+            z-index: 1000;
+            width: 100%;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        #map-modal-container {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<main class="container py-5">
+    <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+
+        <h2 class="mb-4"
+            th:text="${chore.choreId != null} ? 'Edit Chore' : 'Add New Chore'">
+        </h2>
+
+        <form th:action="@{${chore.choreId == null ? '/dashboard/choreCreate' : '/dashboard/chore/' + chore.choreId}}"
+              method="post">
+
+            <input type="hidden" name="id"
+                   th:if="${chore != null}"
+                   th:value="${chore.choreId}">
+
+            <input type="hidden" name="latitude" id="latitude" th:value="${chore?.latitude}">
+            <input type="hidden" name="longitude" id="longitude" th:value="${chore?.longitude}">
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text"
+                       name="title"
+                       class="form-control"
+                       placeholder="Chore title"
+                       th:value="${chore?.title}"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description"
+                          class="form-control"
+                          placeholder="Describe the chore"
+                          rows="4"
+                          required
+                          th:text="${chore?.description}">
+                </textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <div class="d-flex gap-2">
+                    <div class="position-relative flex-grow-1">
+                        <input type="text"
+                               id="destination"
+                               name="destination"
+                               class="form-control"
+                               placeholder="Type an address..."
+                               th:value="${chore?.destination}"
+                               autocomplete="off">
+                        <div id="suggestions"></div>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#mapModal">
+                        📍 Pick on Map
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="number"
+                       name="phoneNumber"
+                       class="form-control"
+                       placeholder="Contact phone"
+                       th:value="${chore?.phoneNumber}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Price</label>
+                <input type="number"
+                       name="price"
+                       class="form-control"
+                       placeholder="Price in denars"
+                       th:value="${chore?.price}"
+                       required>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"
+                        th:text="${chore.choreId != null} ? 'Update Chore' : 'Save Chore'">
+                </button>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">Pick a Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="map-modal-container"></div>
+            </div>
+            <div class="modal-footer">
+                <small class="text-muted me-auto">Click anywhere on the map to drop a pin</small>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Confirm Location</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let currentLat = /*[[${chore?.latitude}]]*/ null;
+    let currentLng = /*[[${chore?.longitude}]]*/ null;
+
+    const map = L.map('map-modal-container').setView(
+        currentLat && currentLng ? [currentLat, currentLng] : [41.9981, 21.4254], 13
+    );
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker;
+    if (currentLat && currentLng) {
+        marker = L.marker([currentLat, currentLng]).addTo(map);
+    }
+
+    document.getElementById('mapModal').addEventListener('shown.bs.modal', () => {
+        map.invalidateSize();
+        if (currentLat && currentLng) {
+            map.setView([currentLat, currentLng], 13);
+        }
+    });
+
+    map.on('click', async function(e) {
+        const { lat, lng } = e.latlng;
+
+        if (marker) marker.remove();
+        marker = L.marker([lat, lng]).addTo(map);
+
+        currentLat = lat;
+        currentLng = lng;
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+            const data = await res.json();
+            document.getElementById('destination').value = data.display_name;
+        } catch (e) {
+            console.error('Reverse geocode failed', e);
+        }
+    });
+
+    const destinationInput = document.getElementById('destination');
+    const suggestionsBox = document.getElementById('suggestions');
+    let debounceTimer;
+
+    destinationInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = this.value.trim();
+
+        if (query.length < 3) {
+            suggestionsBox.innerHTML = '';
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`);
+                const results = await res.json();
+
+                suggestionsBox.innerHTML = '';
+                results.forEach(result => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.textContent = result.display_name;
+                    item.addEventListener('click', () => {
+                        destinationInput.value = result.display_name;
+                        suggestionsBox.innerHTML = '';
+
+                        currentLat = parseFloat(result.lat);
+                        currentLng = parseFloat(result.lon);
+                        document.getElementById('latitude').value = currentLat;
+                        document.getElementById('longitude').value = currentLng;
+
+                        // update map pin
+                        if (marker) marker.remove();
+                        marker = L.marker([currentLat, currentLng]).addTo(map);
+                        map.setView([currentLat, currentLng], 15);
+                    });
+                    suggestionsBox.appendChild(item);
+                });
+            } catch (e) {
+                console.error('Autocomplete failed', e);
+            }
+        }, 500);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!destinationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.innerHTML = '';
+        }
+    });
+</script>
+</body>
+</html>

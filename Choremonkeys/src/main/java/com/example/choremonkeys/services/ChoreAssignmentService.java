@@ -16,11 +16,11 @@ public interface ChoreAssignmentService {
 
     List<ChoreAssignment> findAvailableChores();
 
-    ChoreAssignment createAssignment(Long employerId, Long choreId, LocalDateTime deadline);
+    ChoreAssignment createAssignment(Long employerId, Long choreId, LocalDateTime deadline, Long max);
+
+    ChoreAssignment updateAssignment(Long id,Long employerId, Long choreId, LocalDateTime deadline, Long max);
 
     ChoreAssignment acceptChore(Long assignmentId, Long workerId);
-
-    ChoreAssignment startChore(Long assignmentId, Long workerId);
 
     ChoreAssignment completeChore(Long assignmentId, Long workerId);
 

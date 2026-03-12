@@ -14,4 +14,6 @@ public interface ChoreRepository extends JpaRepository<Chore, Long> {
     List<Chore> findbyTitle(String Title);
     @Query ("SELECT c FROM Chore c WHERE LOWER(c.destination) LIKE CONCAT(LOWER(:title), '%')")
     List<Chore> findbyDestination(String Destination);
+
+    List<Chore> findByEmployer_Id(Long employerId);
 }

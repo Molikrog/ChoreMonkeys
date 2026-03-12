@@ -47,7 +47,8 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
     @Override
     public ChoreAssignment createAssignment(Long employerId,
                                             Long choreId,
-                                            LocalDateTime deadline) {
+                                            LocalDateTime deadline,
+                                            Long max) {
 
         User employer = userService.findById(employerId);
 
@@ -63,6 +64,34 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
         return choreAssignmentRepository.save(assignment);
     }
 
+    @Override
+    public ChoreAssignment updateAssignment(Long id,Long employerId, Long choreId, LocalDateTime deadline, Long max) {
+
+        ChoreAssignment choreAssignment = findById(id);
+
+
+        User employer = userService.findById(employerId);
+
+        if (employer.getUserType() != UserType.EMPLOYER) {
+            throw new RuntimeException("Only employers can edit assignments");
+        }
+
+        choreAssignment.setEmployer(employer);
+
+        Chore chore = choreService.findById(choreId);
+
+        choreAssignment.setChore(chore);
+        choreAssignment.setLocalDateTime(deadline);
+
+
+
+
+        return choreAssignmentRepository.save(choreAssignment);
+    }
+
+
+
+    // Business logic of completeing a chore
     @Override
     public ChoreAssignment acceptChore(Long assignmentId, Long workerId) {
 
@@ -142,23 +171,20 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
         }
 
         User worker = assignment.getWorker();
-        Long price = assignment.getChore().getPrice();
+        int price = assignment.getChore().getPrice();
 
         if (employer.getMoney() < price) {
             throw new RuntimeException("Insufficient funds");
         }
 
-        employer.setMoney(employer.getMoney() - price);
-        worker.setMoney(worker.getMoney() + price);
+        userService.addMoney(employer.getId(), -price);
+        userService.addMoney(worker.getId(), price);
 
         assignment.setChoreStatus(ChoreStatus.Completed);
 
-        choreService.updateChoreStatus(
-                assignment.getChore().getChoreId(),
-                ChoreStatus.Completed
-        );
+        choreService.updateChoreStatus(assignment.getChore().getChoreId(), ChoreStatus.Completed);
 
-        return assignment;
+        return choreAssignmentRepository.save(assignment);
     }
 
     @Override
@@ -176,6 +202,8 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
 
         return choreAssignmentRepository.save(assignment);
     }
+
+    // search/filter
 
     @Override
     public List<ChoreAssignment> findByEmployer(Long employerId) {
@@ -210,7 +238,16 @@ public class ChoreAssignmentServiceImpl implements ChoreAssignmentService {
 
     @Override
     public ChoreAssignment assignWorker(Long choreId, User worker) {
-        return null;
+        ChoreAssignment assignment = findById(choreId);
+
+        if (assignment.getChoreStatus() != ChoreStatus.Available) {
+            throw new RuntimeException("Chore is not available");
+        }
+
+        assignment.setWorker(worker);
+        assignment.setChoreStatus(ChoreStatus.Taken);
+
+        return choreAssignmentRepository.save(assignment);
     }
 
     @Override

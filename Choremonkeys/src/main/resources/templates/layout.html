@@ -9,7 +9,7 @@
 
 <main class="flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-6xl w-full p-8">
-        <div th:replace="~{${content} :: content}"></div>
+        <div th:replace="~{__${content}__:: content}"></div>
     </div>
 </main>
 

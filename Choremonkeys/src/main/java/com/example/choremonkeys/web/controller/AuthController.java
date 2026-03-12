@@ -23,20 +23,30 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(Model model) {
+
+        model.addAttribute("user", new User());
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(
-            @RequestParam String username,
-            @RequestParam String password,
-            @RequestParam String email,
-            @RequestParam Long money,
-            @RequestParam UserType userType,
-            RedirectAttributes redirectAttributes
-    ) {
-        userService.createUser(username, password, email, money, userType);
+    public String registerUser(@RequestParam String username,
+                               @RequestParam String password,
+                               @RequestParam String email,
+                               @RequestParam UserType userType,
+                               RedirectAttributes redirectAttributes) {
+        if(userService.existsByUsername(username)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Username already exists!");
+            return "redirect:/register";
+        }
+        if(userService.existsByEmail(email)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Email already exists!");
+            return "redirect:/register";
+        }
+
+        userService.createUser(username, password, email, 0L, userType);
         redirectAttributes.addFlashAttribute("successMessage", "Registration successful! You can now log in.");
         return "redirect:/login";
-    }}
+    }
+
+}

@@ -4,9 +4,9 @@ import com.example.choremonkeys.models.User;
 import com.example.choremonkeys.models.UserType;
 import com.example.choremonkeys.models.exceptions.InvalidUserIdExcpetion;
 import com.example.choremonkeys.models.exceptions.InvalidUsernameException;
-import com.example.choremonkeys.repository.ChoreRepository;
 import com.example.choremonkeys.repository.UserRepository;
 import com.example.choremonkeys.services.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -51,7 +52,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(String username, String password, String email, Long money, UserType userType) {
-        return userRepository.save(new User(username, password, email, money, userType));
+        String encodedPassword = passwordEncoder.encode(password);
+        return userRepository.save(new User(username, encodedPassword, email, money, userType));
     }
 
     @Override
@@ -96,21 +98,18 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-//    @Override
-//    public void migratePlainTextPasswords() {
-//        List<User> users = userRepository.findAll();
-//
-//        for (User user : users) {
-//
-//            // skip already encoded passwords
-//            if (user.getPassword().startsWith("$2a$")
-//                    || user.getPassword().startsWith("$2b$")) {
-//                continue;
-//            }
-//
-//            String encoded = passwordEncoder.encode(user.getPassword());
-//            user.setPassword(encoded);
-//            userRepository.save(user);
-//        }
-//    }
+    @Override
+    public User updateUserType(Long id, UserType userType) {
+        User user = findById(id);
+        user.setUserType(userType);
+        userRepository.save(user);
+        return user;
+    }
+
+    @Override
+    public void addMoney(Long userId, int amount) {
+        User user = findById(userId);
+        user.setMoney(user.getMoney() + amount);
+        userRepository.save(user);
+    }
 }

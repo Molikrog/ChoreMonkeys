@@ -38,7 +38,7 @@ public class ChoreAssignment {
     private User worker;
 
 
-    public ChoreAssignment ( User employerList, Chore choreList, LocalDateTime deadline, ChoreStatus choreStatus){
+    public ChoreAssignment (User employerList, Chore choreList, LocalDateTime deadline, ChoreStatus choreStatus){
         this.employer = employerList;
         this.chore = choreList;
         this.localDateTime = deadline;

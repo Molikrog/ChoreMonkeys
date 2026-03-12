@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,22 +17,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-//                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",
-                                "/dashboard",
-                                "/login",
-                                "/register",
-                                "/css/**",
-                                "/js/**"
-                        ).permitAll()
-
-                        .requestMatchers("/chores/add").hasRole("EMPLOYER")
-                        .requestMatchers("/chores/edit").hasRole("EMPLOYER")
-                        .requestMatchers("/chores/apply/**").hasRole("WORKER")
-                        .requestMatchers("/chores/complete/**").hasRole("WORKER")
-
+                        .requestMatchers("/login", "/register").permitAll()
+                        .requestMatchers("/dashboard/choreCreate", "/dashboard/assignmentCreate").hasRole("EMPLOYER")
+                        .requestMatchers("/assignments/*/accept", "/assignments/*/complete").hasRole("WORKER")
+                        .requestMatchers("/assignments/*/approve", "/assignments/*/cancel").hasRole("EMPLOYER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -2,6 +2,7 @@ package com.example.choremonkeys.services.Impl;
 
 import com.example.choremonkeys.models.Chore;
 import com.example.choremonkeys.models.ChoreStatus;
+import com.example.choremonkeys.models.User;
 import com.example.choremonkeys.models.exceptions.InvalidChoresIdException;
 import com.example.choremonkeys.repository.ChoreAssignmentRepository;
 import com.example.choremonkeys.repository.ChoreRepository;
@@ -52,12 +53,14 @@ public class ChoreServiceImpl implements ChoreService {
 
 
     @Override
-    public Chore createChoreWithStatus(String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus) {
-        return choreRepository.save(new Chore(title, description, destination, price, phoneNumber, choreStatus));
+    public Chore createChoreWithStatus(String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus, User employer, Double latitude, Double longitude) {
+        Chore chore = new Chore(title, description, destination, price, phoneNumber, choreStatus, longitude, latitude);
+        chore.setEmployer(employer);
+
+        return choreRepository.save(chore);
     }
 
-    @Override
-    public Chore updateChore(Long id, String title, String description, String destination, Integer phoneNumber, Long price, ChoreStatus choreStatus) {
+    public Chore updateChore(Long id, String title, String description, String destination, Long phoneNumber, int price, ChoreStatus choreStatus, Double latitude, Double longitude) {
         Chore chore = findById(id);
         chore.setTitle(title);
         chore.setDescription(description);
@@ -65,6 +68,8 @@ public class ChoreServiceImpl implements ChoreService {
         chore.setPhoneNumber(phoneNumber);
         chore.setPrice(price);
         chore.setChoreStatus(choreStatus);
+        chore.setLongitude(longitude);
+        chore.setLatitude(latitude);
         choreRepository.save(chore);
         return chore;
     }
@@ -75,6 +80,12 @@ public class ChoreServiceImpl implements ChoreService {
         chore.setChoreStatus(choreStatus);
         choreRepository.save(chore);
         return chore;
+    }
+
+    @Override
+    public List<Chore> findByEmployer(Long employerId) {
+        return choreRepository.findByEmployer_Id(employerId);
+
     }
 
     @Override
@@ -91,4 +102,6 @@ public class ChoreServiceImpl implements ChoreService {
         return true;
 
     }
+
+
 }
